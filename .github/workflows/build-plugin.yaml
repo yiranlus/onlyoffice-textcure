@@ -13,6 +13,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest  # Or specific like 9.12.0
+
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
@@ -20,10 +25,10 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci
+      run: pnpm install
 
     - name: Build plugin
-      run: npm run build:plugin
+      run: pnpm run build:plugin
 
     - name: Get version from package.json
       id: version
