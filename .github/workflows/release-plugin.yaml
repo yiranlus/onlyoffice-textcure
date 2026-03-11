@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    uses: ./.github/workflows/build-plugin.yaml@main  # Calls your existing one (@branch/tag)
+    uses: ./.github/workflows/build-plugin.yaml
 
   release:
     needs: build
