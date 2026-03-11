@@ -1,8 +1,6 @@
 {
     "name"       : "Antidote",
     "guid"       : "asc.{D788954F-C5E5-4395-9905-B4D639FE952E}",
-    "version"    : "0.0.1",
-    "baseUrl"    : "",
     "variations" : [
         {
             "description"         : "Improve the spelling and grammar in your texts with Druide Antidote.",
