@@ -1,20 +1,15 @@
 import { WordProcessorAgent, AntidoteConnector, ConnectixAgent } from "./antidote.min.js";
 
-// const antidotePort = 49157;
-
 class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
-    constructor(Asc, title, textArray) {
+    constructor(Asc) {
+        console.log("created WordProcessorAgent");
         super();
         this.Asc = Asc;
-        this.title = title;
-        this.textArray = textArray;
-        for (let i = 1; i < textArray.length; i++) {
-            this.textArray[i].globalPos += 4 * i;
-        }
     }
 
     sessionEnded() {
         this.Asc.plugin.executeCommand("close", "");
+        super.sessionEnded();
     }
 
     findIndex(pos) {
@@ -110,84 +105,32 @@ class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
         );
     }
 
+    textZonesAvailable() {
+        return !!this.textArray;
+    }
+
     zonesToCorrect(_params) {
-        const text = this.textArray.map((el, index) =>
-            el.textArray.map(el => el.text).join("")
-        ).join("\r\n\r\n");
+        console.log("zonesToCorrect called");
+        const text = (
+            this.textArray ?
+            this.textArray.map((el, index) =>
+                el.textArray.map(el => el.text).join("")
+            ).join("\r\n\r\n") :
+            "Please wait..."
+        );
         return [{
             text,
-            zoneId: "0",
+            zoneId: "",
             zoneIsFocused: true,
         }];
     }
-}
 
-(function(window, undefined){
-    function getFullUrl(name) {
-      const location = window.location;
-      const start = location.pathname.lastIndexOf("/") + 1;
-      const file = location.pathname.slice(start);
-      return location.href.replace(file, name);
-    }
-
-    const connectionErrorModal = {
-        url: getFullUrl("connection-error.html"),  // Same HTML as config variationnt
-        description: window.Asc.plugin.tr("Error"),
-        isVisual: true,
-        EditorsSupport: ["word"],
-        isVisual : true,
-        isModal : true,
-        isInsideMode : false,
-        initDataType : "none",
-        initData : "",
-        size: [350, 150],
-        buttons: [
-            {
-                text: window.Asc.plugin.tr("Close"),
-                primary: true
-            }
-        ]
-    };
-
-    function getAntidotePort() {
-        var antidotePort = localStorage.getItem("ANTIDOTE_PORT");
-        console.log("antidotePort: ", antidotePort)
-        if (antidotePort) {
-            return Number(antidotePort);
-        }
-
-        throw new Error("Antidote port is not set.")
-    }
-
-    function launchCorrector(Asc, title, textArray) {
-        AntidoteConnector.announcePresence();
-        console.log("Status of AntidoteConnector: ", AntidoteConnector.isDetected());
-
-        const agent = new ConnectixAgent(
-            new WordProcessorAgentOnlyOfficeDocument(Asc, title, textArray),
-            AntidoteConnector.isDetected() ?
-            AntidoteConnector.getWebSocketPort :
-            async () => getAntidotePort()
-        );
-
-
-        agent.connectWithAntidote()
-            .then(() => agent.launchCorrector())
-            .catch(error => {
-                window.Asc.plugin.executeMethod("ShowWindow", ["iframe_asc.{E649827B-6CD5-477F-A7A7-C6952C813ADE}", connectionErrorModal]);
-
-                console.log("Error Encountered: ", error)
-            })
-    }
-
-    window.Asc.plugin.init = function() {
-        window.Asc.plugin.callCommand(() => {
+    updateTextArray() {
+        console.log("Update text array");
+        this.textArray = null;
+        this.Asc.plugin.callCommand(() => {
             const oDocument = Api.GetDocument();
             const oDocumentInfo = oDocument.GetDocumentInfo();
-
-            let start = 0, end = 0;
-
-            let text = "";
 
             let textArray = [], globalPos = 0;
             for (let i = 0; i < oDocument.GetElementsCount(); i++) {
@@ -213,13 +156,95 @@ class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
             return {
                 title: oDocumentInfo.Title,
                 textArray
-            }
+            };
         },
         false,
         false,
         (res) => {
-            launchCorrector(window.Asc, res.title, res.textArray);
-        })
+            for (let i = 1; i < res.textArray.length; i++) {
+                // add new line length "\r\n"
+                res.textArray[i].globalPos += 4 * i;
+            }
+            this.title = res.title;
+            this.textArray = res.textArray;
+            console.log("textArray in the callback: ", JSON.stringify(this.textArray));
+        });
+    }
+}
+
+(function(window, undefined){
+    const wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc);
+
+    function getFullUrl(name) {
+        const location = window.location;
+        const start = location.pathname.lastIndexOf("/") + 1;
+        const file = location.pathname.slice(start);
+        return location.href.replace(file, name);
+    }
+
+    const connectionErrorModal = {
+        url: getFullUrl("connection-error.html"),  // Same HTML as config variationnt
+        description: window.Asc.plugin.tr("Error"),
+        isVisual: true,
+        EditorsSupport: ["word"],
+        isVisual : true,
+        isModal : true,
+        isInsideMode : false,
+        initDataType : "none",
+        initData : "",
+        size: [350, 150],
+        buttons: [
+            {
+                text: window.Asc.plugin.tr("Close"),
+                primary: true
+            }
+        ]
+    };
+
+    function getAntidotePort() {
+        const antidotePort = localStorage.getItem("ANTIDOTE_PORT");
+        console.log("antidotePort: ", antidotePort)
+        if (antidotePort) {
+            return Number(antidotePort);
+        }
+
+        throw new Error("Antidote port is not set.")
+    }
+
+    function launchCorrector() {
+        AntidoteConnector.announcePresence();
+        console.log("Status of AntidoteConnector: ", AntidoteConnector.isDetected());
+
+        const agent = new ConnectixAgent(
+            wordProcessorAgent,
+            AntidoteConnector.isDetected() ?
+            AntidoteConnector.getWebSocketPort :
+            async () => getAntidotePort()
+        );
+
+        agent.connectWithAntidote()
+            .then(() => agent.launchCorrector())
+            .catch(error => {
+                window.Asc.plugin.executeMethod("ShowWindow", ["iframe_asc.{E649827B-6CD5-477F-A7A7-C6952C813ADE}", connectionErrorModal]);
+
+                console.log("Error Encountered: ", error)
+            })
+    }
+
+    window.Asc.plugin.init = () => {
+        window.Asc.plugin.attachEditorEvent("onDocumentContentReady", () => {
+            wordProcessorAgent.updateTextArray();
+        });
+
+        window.Asc.plugin.attachEditorEvent("onParagraphText", (data) => {
+            console.log("Paragraph updated:", data.paragraphId);
+            // data.annotations.forEach(a => {
+            //     console.log(`Annotation ${a.id}: ${a.name} at ${a.start} (${a.length} chars)`);
+            // });
+            wordProcessorAgent.updateTextArray();
+        });
+
+        launchCorrector();
     };
 
     window.Asc.plugin.button = function(id, windowId) {
@@ -227,4 +252,5 @@ class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
             window.Asc.plugin.executeCommand("close", "");
         }
     };
+
 })(window, undefined);
