@@ -1,3 +1,5 @@
+import { applyTranslation } from "./utils";
+
 let inputEl: HTMLInputElement | null;
 
 window.Asc.plugin.init = function () {
@@ -30,3 +32,7 @@ window.Asc.plugin.button = (id: string, windowId: string) => {
     window.Asc.plugin.executeCommand("close", "");
     // }
 };
+
+window.Asc.plugin.onTranslate = () => {
+  applyTranslation(window, "lable_antidote_port", "Websocket Port:");
+}

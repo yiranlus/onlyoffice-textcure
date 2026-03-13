@@ -3,6 +3,8 @@ import {
   ConnectixAgent,
 } from "@druide-informatique/antidote-api-js";
 import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
+import { applyTranslation } from "./utils";
+
 
 (function(window, undefined){
   const wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc);
@@ -56,7 +58,7 @@ import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
     agent.connectWithAntidote()
       .then(() => agent.launchCorrector())
       .catch(error => {
-        window.Asc.plugin.executeMethod("ShowWindow", ["iframe_asc.{E649827B-6CD5-477F-A7A7-C6952C813ADE}", connectionErrorModal]);
+        window.Asc.plugin.executeMethod("ShowWindow", ["connection-error-modal", connectionErrorModal]);
 
         console.log("Error Encountered: ", error)
       })
@@ -68,7 +70,8 @@ import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
     });
 
     window.Asc.plugin.attachEditorEvent("onParagraphText", (data: any) => {
-      if (!wordProcessorAgent.updateByAntidote) {
+      console.log("paragraph changed: ", data);
+      if (!wordProcessorAgent.updatingByAntidote) {
         wordProcessorAgent.updateParagraphs();
       }
     });
@@ -76,8 +79,8 @@ import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
     launchCorrector();
   };
 
-  window.Asc.plugin.button = function(id: string, windowId: string) {
-    if (windowId === "iframe_asc.{E649827B-6CD5-477F-A7A7-C6952C813ADE}") {
+  window.Asc.plugin.button = (id: string, windowId: string) => {
+    if (windowId === "connection-error-modal") {
       window.Asc.plugin.executeCommand("close", "");
     }
   };

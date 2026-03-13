@@ -46,13 +46,13 @@ export class EmptyDataError extends Error {
 export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
   title: string;
   Asc: any;
-  updateByAntidote: boolean;
+  updatingByAntidote: boolean;
   paragraphs: Paragraph[] | null;
 
   constructor(Asc: any) {
     super();
     this.Asc = Asc;
-    this.updateByAntidote = false;
+    this.updatingByAntidote = false;
 
     this.title = "";
     this.paragraphs = null;
@@ -97,7 +97,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
       throw new EmptyDataError();
     }
 
-    this.updateByAntidote = true;
+    this.updatingByAntidote = true;
 
     let segmentIndex = this.findIndex(params.positionStartReplace, true);
     let i = segmentIndex.par, j = segmentIndex.seg;
@@ -153,12 +153,12 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
         for (let i = segmentIndex.par + 1; i < this.paragraphs.length; i++) {
           this.paragraphs[i].globalPos += res.diff;
         }
+        this.updatingByAntidote = false;
       });
     } catch (error) {
       console.log("error: ", error);
       return false;
     }
-    this.updateByAntidote = false;
 
     return true;
   }

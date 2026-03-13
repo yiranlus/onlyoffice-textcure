@@ -1,48 +1,61 @@
 {
-    "name"       : "Antidote",
-    "guid"       : "asc.{D788954F-C5E5-4395-9905-B4D639FE952E}",
-    "variations" : [
-        {
-            "description"         : "Improve the spelling and grammar in your texts with Druide Antidote.",
-            "url"                 : "index.html",
-            "icons"               : [
-                "resources/images/icon.png",
-                "resources/images/icon@2x.png"
-            ],
-            "isViewer"            : false,
-            "EditorsSupport"      : ["word"],
-            "isVisual"            : false,
-            "initDataType"        : "none",
-            "initData"            : "",
-            "buttons"             : [],
-            "store": {
-                "icons": {
-                    "light": "resources/store/icons",
-                    "dark": "resources/store/icons"
-                }
-            }
-        },
-        {
-            "description"         : "Set Antidote Websocket port",
-            "url"                 : "settings.html",
-            "icons"               : [
-                "resources/images/icon.png",
-                "resources/images/icon@2x.png"
-            ],
-            "isViewer"            : false,
-            "EditorsSupport"      : ["word"],
-            "isVisual"            : true,
-            "isModal"             : true,
-            "isInsideMode"        : false,
-            "initDataType"        : "none",
-            "initData"            : "",
-            "buttons"             : [
-                {
-                    "text": "Ok",
-                    "primary": true
-                }
-            ],
-            "size"                : [360, 60]
+  "name": "Antidote",
+  "guid": "asc.{D788954F-C5E5-4395-9905-B4D639FE952E}",
+  "variations": [
+    {
+      "description": "Improve the spelling and grammar in your texts with Druide Antidote.",
+      "descriptionLocale": {
+        "fr": "Améliorez l'orthographe et la grammaire dans vos textes avec Druide Antidote."
+      },
+      "url": "index.html",
+      "icons": [
+        "resources/images/icon.png",
+        "resources/images/icon@2x.png"
+      ],
+      "isViewer": false,
+      "EditorsSupport": [
+        "word"
+      ],
+      "isVisual": false,
+      "initDataType": "none",
+      "initData": "",
+      "buttons": [],
+      "store": {
+        "icons": {
+          "light": "resources/store/icons",
+          "dark": "resources/store/icons"
         }
-    ]
+      }
+    },
+    {
+      "description": "Settings",
+      "descriptionLocale": {
+        "fr": "Paramètres"
+      },
+      "url": "settings.html",
+      "icons": [
+        "resources/images/icon.png",
+        "resources/images/icon@2x.png"
+      ],
+      "isViewer": false,
+      "EditorsSupport": [
+        "word"
+      ],
+      "isVisual": true,
+      "isModal": true,
+      "isInsideMode": false,
+      "initDataType": "none",
+      "initData": "",
+      "buttons": [
+        {
+          "text": "Ok",
+          "primary": true
+        }
+      ],
+      "size": [
+        360,
+        60
+      ]
+    }
+  ]
 }
