@@ -3,8 +3,6 @@ import {
   ConnectixAgent,
 } from "@druide-informatique/antidote-api-js";
 import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
-import { applyTranslation } from "./utils";
-
 
 (function(window, undefined){
   const wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc);
@@ -58,9 +56,12 @@ import { applyTranslation } from "./utils";
     agent.connectWithAntidote()
       .then(() => agent.launchCorrector())
       .catch(error => {
-        window.Asc.plugin.executeMethod("ShowWindow", ["connection-error-modal", connectionErrorModal]);
+        const errorDialog = new window.Asc.PluginWindow();
+        errorDialog.show(connectionErrorModal);
+        window.Asc.plugin.connectionErrorModalId = errorDialog.id;
+        // window.Asc.plugin.executeMethod("ShowWindow", ["connection-error-modal", connectionErrorModal]);
 
-        console.log("Error Encountered: ", error)
+        console.log(error)
       })
   }
 
@@ -70,7 +71,6 @@ import { applyTranslation } from "./utils";
     });
 
     window.Asc.plugin.attachEditorEvent("onParagraphText", (data: any) => {
-      console.log("paragraph changed: ", data);
       if (!wordProcessorAgent.updatingByAntidote) {
         wordProcessorAgent.updateParagraphs();
       }
@@ -80,7 +80,7 @@ import { applyTranslation } from "./utils";
   };
 
   window.Asc.plugin.button = (id: string, windowId: string) => {
-    if (windowId === "connection-error-modal") {
+    if (windowId === window.Asc.plugin.connectionErrorModalId) {
       window.Asc.plugin.executeCommand("close", "");
     }
   };
