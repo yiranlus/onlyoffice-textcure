@@ -4,7 +4,8 @@ interface IAsc {
   plugin: any;
   scope: {
     paramsReplace: {
-      elementIndex: number, newText: string
+      elementIndex: number,
+      text: string
     }
   }
 }

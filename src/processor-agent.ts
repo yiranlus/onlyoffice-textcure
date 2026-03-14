@@ -65,6 +65,9 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
   }
 
   correctIntoWordProcessor(params: ParamsReplace): boolean {
+    // Waiting to previous action to finish
+    if (this.updatingByAntidote) return false;
+
     this.updatingByAntidote = true;
 
     let elementIndex = this.findIndex(params.positionStartReplace, true);
@@ -76,37 +79,35 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
       text.substring(params.positionReplaceEnd - this.paragraphs![elementIndex].globalPos)
       ).replace(/(\r\n)*$/, "");
 
-    this.Asc.scope.paramsReplace = { elementIndex, newText };
+    this.Asc.scope.paramsReplace = { elementIndex, text: newText };
 
-    try {
-      this.Asc.plugin.callCommand(() => {
-        const { elementIndex, newText } = Asc.scope.paramsReplace;
+    this.Asc.plugin.callCommand(() => {
+      const { elementIndex, text } = Asc.scope.paramsReplace;
 
-        var oDocument = Api.GetDocument();
-        var oElement = oDocument.GetElement(elementIndex);
+      var oDocument = Api.GetDocument();
+      var oElement = oDocument.GetElement(elementIndex);
 
-        var oldText = oElement.GetText();
+      var oldText = oElement.GetText({"Numbering": false}).replace(/(\r\n)*$/, "");
 
-        oElement.Select();
-        Api.ReplaceTextSmart([newText]);
+      oElement.Select();
+      Api.ReplaceTextSmart([text]);
 
-        return {
-          text: oElement.GetText(),
-          diff: oElement.GetText().length - oldText.length
-        }
-      },
-      false,
-      true,
-      (res: {text: string, diff: number}) => {
-        this.paragraphs![elementIndex].text = res.text;
-        for (let i = elementIndex + 1; i < this.paragraphs!.length; i++) {
-          this.paragraphs![i].globalPos += res.diff;
-        }
-        this.updatingByAntidote = false;
-      });
-    } catch (error) {
-      return false;
-    }
+      const newText = oElement.GetText({"Numbering": false}).replace(/(\r\n)*$/, "");
+
+      return {
+        text: newText,
+        diff: newText.length - oldText.length
+      }
+    },
+    false,
+    true,
+    (res: {text: string, diff: number}) => {
+      this.paragraphs![elementIndex].text = res.text;
+      for (let i = elementIndex + 1; i < this.paragraphs!.length; i++) {
+        this.paragraphs![i].globalPos += res.diff;
+      }
+      this.updatingByAntidote = false;
+    });
 
     return true;
   }
@@ -150,7 +151,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
       for (let i = 0; i < oDocument.GetElementsCount(); i++) {
         const element = oDocument.GetElement(i);
         if (element.GetClassType() === "paragraph") {
-          const text = element.GetText().replace(/(\r\n)*$/, "");
+          const text = element.GetText({"Numbering": false}).replace(/(\r\n)*$/, "");
           paragraphs.push({ globalPos, text });
           globalPos += text.length;
         } else {
