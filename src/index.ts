@@ -78,10 +78,10 @@ import { WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/selecti
 
         const range = (start === end) ? null : { start, end };
 
-        if (oRange) {
-          console.log(`oRange Text: "${JSON.stringify(oRange.GetText())}"`);
-          console.log(range);
-        }
+        // if (oRange) {
+        //   console.log(`oRange Text: "${JSON.stringify(oRange.GetText())}"`);
+        //   console.log(range);
+        // }
 
         return { title, range };
       }

@@ -50,14 +50,14 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
 
         const textArr = text!.replace(/(?:\r\n)+$/, "").split(/(?:\r\n)+|\t/g);
 
-        console.log(`Text to Replace: ${JSON.stringify(text)}`);
-        console.log(`Text Array to Replace: ${JSON.stringify(textArr)}`);
+        // console.log(`Text to Replace: ${JSON.stringify(text)}`);
+        // console.log(`Text Array to Replace: ${JSON.stringify(textArr)}`);
 
         oRange.Select();
         Api.ReplaceTextSmart(textArr, String.fromCharCode(160));
 
-        console.log("Updated Range.");
-        console.log("start: ", oRange.GetStartPos(), "end: ", oRange.GetEndPos())
+        // console.log("Updated Range.");
+        // console.log("start: ", oRange.GetStartPos(), "end: ", oRange.GetEndPos())
 
         return {
           start: oRange.GetStartPos(),
@@ -69,7 +69,7 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
     )
     .then(range => {
       this.range = range;
-      console.log("Updated range: ", this.range);
+      // console.log("Updated range: ", this.range);
     });
   }
 
@@ -117,7 +117,7 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
     )
     .then(text => {
       this.text = text;
-      console.log(`Stored text: ${JSON.stringify(this.text)}`);
+      // console.log(`Stored text: ${JSON.stringify(this.text)}`);
     });
   }
 }

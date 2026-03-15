@@ -101,7 +101,6 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
         this.paragraphs![i].globalPos += res.diff;
       }
     })
-    .catch(err => console.log(err));
   }
 
   configuration(): WordProcessorConfiguration {
@@ -133,7 +132,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
   }
 
   updateText(): Promise<void> {
-    console.log("_updateParagraphs called");
+    // console.log("_updateParagraphs called");
     this.paragraphs = null;
 
     return this.callCommand(
@@ -163,6 +162,5 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
       }
       this.paragraphs = paragraphs;
     })
-    .catch(err => console.log(err));
   }
 }
