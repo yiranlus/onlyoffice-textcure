@@ -30,6 +30,8 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
   mutexQueue: Mutex;
   mutexDocument: Mutex;
 
+  mutexUpdateText: Mutex;
+
   constructor(Asc: any, title: string) {
     super(Asc, title);
 
@@ -38,6 +40,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
     this.replacingQueue = [];
     this.mutexQueue = new Mutex();
     this.mutexDocument = new Mutex();
+    this.mutexUpdateText = new Mutex();
   }
 
   sessionEnded() {
@@ -186,7 +189,16 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
 
   updateText(): Promise<void> {
     console.log("UpdateParagraphs called.");
-    return this.mutexDocument.runExclusive(() => this._updateParagraphs());
+
+    // Only the last call to updateText is effective, so here canceling all the
+    // previous call that hasn't aquire the lock.
+    this.mutexUpdateText.cancel();
+
+    return this.mutexUpdateText.runExclusive(
+      () => this.mutexDocument.runExclusive(
+        () => this._updateParagraphs()
+      )
+    );
   }
 
   _updateParagraphs(): Promise<void> {
