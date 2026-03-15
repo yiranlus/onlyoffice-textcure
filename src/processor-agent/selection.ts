@@ -7,6 +7,7 @@ import {
   DocumentType
 } from "@druide-informatique/antidote-api-js";
 import { WordProcessorAgentOnlyOffice } from "./base";
+import { Mutex } from "async-mutex";
 
 export type Range = {
   start: number,
@@ -16,6 +17,8 @@ export type Range = {
 export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnlyOffice {
   range: Range;
   text?: string;
+
+  mutexUpdateText: Mutex;
 
   constructor(Asc: IAsc, title: string, range: Range) {
     super(Asc, title);
@@ -31,7 +34,8 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
   configuration(): WordProcessorConfiguration {
     return {
       documentTitle: `${this.title} [selection]`,
-      activeMarkup: DocumentType.text
+      activeMarkup: DocumentType.text,
+      carriageReturn: "\r\n"
     };
   }
 
@@ -50,12 +54,29 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
         const oDocument = Api.GetDocument();
         const oRange = oDocument.GetRange(start, end);
 
+        const textArr = text!.replace(/(?:\r\n)+$/, "").split(/(?:\r\n)+|\t/g);
+
         console.log(`Text to Replace: ${JSON.stringify(text)}`);
+        console.log(`Text Array to Replace: ${JSON.stringify(textArr)}`);
 
         oRange.Select();
-        Api.ReplaceTextSmart(text!.split("\r\n\r\n"), String.fromCharCode(160));
-      }
+        Api.ReplaceTextSmart(textArr, String.fromCharCode(160));
+
+        console.log("Updated Range.");
+        console.log("start: ", oRange.GetStartPos(), "end: ", oRange.GetEndPos())
+
+        return {
+          start: oRange.GetStartPos(),
+          end: oRange.GetEndPos(),
+        } as Range;
+      },
+      false,
+      true
     )
+    .then(range => {
+      this.range = range;
+      console.log("Updated range: ", this.range);
+    });
 
     return true;
   }
@@ -91,7 +112,7 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
           Numbering: false,
           Math: false,
           ParaSeparator: "\r\n\r\n",
-          TableCellSeparator: "\r\n",
+          TableRowSeparator: "\r\n\r\n",
           TabSymbol: String.fromCharCode(160)
         });
       },

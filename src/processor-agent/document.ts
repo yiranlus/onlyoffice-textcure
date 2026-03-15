@@ -188,7 +188,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
   }
 
   updateText(): Promise<void> {
-    console.log("UpdateParagraphs called.");
+    // console.log("UpdateParagraphs called.");
 
     // Only the last call to updateText is effective, so here canceling all the
     // previous call that hasn't aquire the lock.
@@ -202,7 +202,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
   }
 
   _updateParagraphs(): Promise<void> {
-    console.log("_updateParagraphs called");
+    // console.log("_updateParagraphs called");
     this.paragraphs = null;
 
     return this.callCommand(
