@@ -6,7 +6,7 @@ import {
 import * as utils from "./utils";
 import { WordProcessorAgentOnlyOffice } from "./processor-agent/base";
 import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent/document";
-import { Range, WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/selection";
+// import { Range, WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/selection";
 
 ((window, undefined) => {
   let wordProcessorAgent: WordProcessorAgentOnlyOffice | null;
@@ -100,25 +100,6 @@ import { Range, WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/
       launchCorrector();
     });
 
-    window.Asc.plugin.attachEditorEvent("onParagraphText", (data: any) => {
-      // console.log("The not firstLoad: ", !firstLoad);
-      // console.log("The expression: ", !firstLoad && wordProcessorAgent
-      //   && !wordProcessorAgent.updatingByAntidote);
-      if (!firstLoad && wordProcessorAgent
-        && !wordProcessorAgent.updatingByAntidote) {
-
-        // Check if currently the text is updated by Antidote,
-        // if not, wait sometime and then recheck to ensure that the
-        // replacingQueue is empty
-        setTimeout(() => {
-          if (!firstLoad && wordProcessorAgent
-            && !wordProcessorAgent.updatingByAntidote) {
-            // console.log("From onParagraphText", data)
-            wordProcessorAgent!.updateText();
-          }
-        }, 100);
-      }
-    });
   };
 
   window.Asc.plugin.button = (id: string, windowId: string) => {

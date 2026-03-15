@@ -69,48 +69,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
     return elementIndex;
   }
 
-  correctIntoWordProcessor(params: ParamsReplace): boolean {
-    if (!this.paragraphs) return false;
-
-    this.mutexQueue.runExclusive(() => {
-      // console.log("Locking Queue");
-      this.replacingQueue.push(params);
-    })
-      .then(() => {
-        // console.log("Calling Apply Corrections")
-        this.applyCorrections();
-      })
-      .catch(error => {
-        console.log(error);
-      })
-
-    return true;
-  }
-
-  async applyCorrections() {
-    await this.mutexDocument.runExclusive(async () => {
-      this.updatingByAntidote = true;
-
-      let params = await this.mutexQueue.runExclusive(() => {
-        // console.log("Retriving Item from the Queue")
-        return this.replacingQueue.shift();
-      });
-
-      while (params) {
-        // console.log("Applying a Correction")
-        await this._correctIntoWordProcessor(params!);
-
-        params = await this.mutexQueue.runExclusive(() => {
-          // console.log("Retriving Item from the Queue")
-          return this.replacingQueue.shift();
-        })
-      }
-
-      this.updatingByAntidote = false;
-    });
-  }
-
-  _correctIntoWordProcessor(params: ParamsReplace): Promise<void> {
+  applyCorrection(params: ParamsReplace): Promise<void> {
     // Waiting to previous action to finish
     // console.log("ParasReplace: ", params);
 
@@ -188,21 +147,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnly
   }
 
   updateText(): Promise<void> {
-    // console.log("UpdateParagraphs called.");
-
-    // Only the last call to updateText is effective, so here canceling all the
-    // previous call that hasn't aquire the lock.
-    this.mutexUpdateText.cancel();
-
-    return this.mutexUpdateText.runExclusive(
-      () => this.mutexDocument.runExclusive(
-        () => this._updateParagraphs()
-      )
-    );
-  }
-
-  _updateParagraphs(): Promise<void> {
-    // console.log("_updateParagraphs called");
+    console.log("_updateParagraphs called");
     this.paragraphs = null;
 
     return this.callCommand(
