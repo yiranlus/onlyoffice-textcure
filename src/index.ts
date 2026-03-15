@@ -2,10 +2,14 @@ import {
   AntidoteConnector,
   ConnectixAgent,
 } from "@druide-informatique/antidote-api-js";
-import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
 
-(function(window, undefined){
-  const wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc);
+import * as utils from "./utils";
+import { WordProcessorAgentOnlyOffice } from "./processor-agent/base";
+import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent/document";
+import { Range, WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/selection";
+
+((window, undefined) => {
+  let wordProcessorAgent: WordProcessorAgentOnlyOffice | null;
 
   function getFullUrl(name: string): string {
     const location = window.location;
@@ -44,7 +48,7 @@ import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
   function launchCorrector() {
     AntidoteConnector.announcePresence();
     const agent = new ConnectixAgent(
-      wordProcessorAgent,
+      wordProcessorAgent!,
       AntidoteConnector.isDetected() ?
       AntidoteConnector.getWebSocketPort :
       async () => getAntidotePort()
@@ -61,16 +65,53 @@ import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent";
 
   window.Asc.plugin.init = () => {
     let firstLoad = true;
-    wordProcessorAgent.updateParagraphs()
-      .then(() => {
-        firstLoad = false;
-        launchCorrector();
-      });
+    utils.callCommand(
+      window.Asc,
+      () => {
+        const oDocument = Api.GetDocument();
+        const oDocumentInfo = oDocument.GetDocumentInfo();
+        const title = oDocumentInfo.Title;
+
+        const oRange = oDocument.GetRangeBySelect();
+        const range = oRange ? {
+          start: oRange.GetStartPos(),
+          end: oRange.GetEndPos()
+        } as Range : null;
+
+        return { title, range };
+      }
+    )
+    .then(async res => {
+      const { title, range } = res;
+      // if (range) {
+        // wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(window.Asc, title, range);
+      // } else {
+        wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc, title);
+      // }
+      await wordProcessorAgent.updateText();
+    })
+    .then(() => {
+      firstLoad = false;
+      launchCorrector();
+    });
 
     window.Asc.plugin.attachEditorEvent("onParagraphText", (data: any) => {
-      if (!wordProcessorAgent.updatingByAntidote && !firstLoad) {
-        console.log("From onParagraphText", data)
-        wordProcessorAgent.updateParagraphs();
+      console.log("The not firstLoad: ", !firstLoad);
+      console.log("The expression: ", !firstLoad && wordProcessorAgent
+        && !wordProcessorAgent.updatingByAntidote);
+      if (!firstLoad && wordProcessorAgent
+        && !wordProcessorAgent.updatingByAntidote) {
+
+        // Check if currently the text is updated by Antidote,
+        // if not, wait sometime and then recheck to ensure that the
+        // replacingQueue is empty
+        setTimeout(() => {
+          if (!firstLoad && wordProcessorAgent
+            && !wordProcessorAgent.updatingByAntidote) {
+            console.log("From onParagraphText", data)
+            wordProcessorAgent!.updateText();
+          }
+        }, 100);
       }
     });
   };

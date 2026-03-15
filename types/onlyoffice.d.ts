@@ -1,16 +1,16 @@
-interface IAsc {
-  PluginWindow: new () => any;
+declare global {
+  interface IAsc {
+    PluginWindow: new () => any;
 
-  plugin: any;
-  scope: {
-    paramsReplace: {
-      elementIndex: number,
-      text: string
+    plugin: any;
+    scope: {
+      paramsReplace: {
+        elementIndex: number,
+        text: string
+      }
     }
   }
-}
 
-declare global {
   /**
   * Document Builder API - available inside Asc.plugin.callCommand()
   * Use (Api as any) in code

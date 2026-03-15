@@ -1,15 +1,14 @@
 import {
-  WordProcessorAgent,
   ParamsReplace,
   ParamsAllowEdit,
   WordProcessorConfiguration,
   ParamsGetZonesToCorrect,
   TextZoneConnectix,
   DocumentType,
-  StyleInfo,
-  TextStyle
 } from "@druide-informatique/antidote-api-js";
 import { Mutex } from "async-mutex";
+
+import { WordProcessorAgentOnlyOffice as WordProcessorAgentOnlyOfficeBase } from "./base";
 
 type Paragraph = {
   globalPos: number,
@@ -24,22 +23,16 @@ export class EmptyDataError extends Error {
   }
 }
 
-export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
-  title: string;
-  Asc: any;
-  updatingByAntidote: boolean;
+export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgentOnlyOfficeBase {
   paragraphs: Paragraph[] | null;
 
   replacingQueue: ParamsReplace[];
   mutexQueue: Mutex;
   mutexDocument: Mutex;
 
-  constructor(Asc: any) {
-    super();
-    this.Asc = Asc;
-    this.updatingByAntidote = false;
+  constructor(Asc: any, title: string) {
+    super(Asc, title);
 
-    this.title = "";
     this.paragraphs = null;
 
     this.replacingQueue = [];
@@ -114,23 +107,26 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
     });
   }
 
-  async _correctIntoWordProcessor(params: ParamsReplace) {
+  _correctIntoWordProcessor(params: ParamsReplace): Promise<void> {
     // Waiting to previous action to finish
     // console.log("ParasReplace: ", params);
 
     let elementIndex = this.findIndex(params.positionStartReplace, true);
+    const globalPos = this.paragraphs![elementIndex].globalPos;
 
     let text = this.paragraphs![elementIndex].text!;
     let newText = (
-      text.substring(0, params.positionStartReplace - this.paragraphs![elementIndex].globalPos) +
+      text.substring(0, params.positionStartReplace - globalPos) +
       params.newString +
-      text.substring(params.positionReplaceEnd - this.paragraphs![elementIndex].globalPos)
+      text.substring(params.positionReplaceEnd - globalPos)
     ).replace(/(\r\n)*$/, "");
+
+    // console.log(`${elementIndex} => "${newText}"`);
 
     this.Asc.scope.paramsReplace = { elementIndex, text: newText };
 
-    return new Promise<void>(resolve => {
-      this.Asc.plugin.callCommand(() => {
+    return this.callCommand(
+      () => {
         const { elementIndex, text } = Asc.scope.paramsReplace;
 
         var oDocument = Api.GetDocument();
@@ -149,15 +145,15 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
         }
       },
       false,
-      true,
-      (res: { text: string, diff: number }) => {
-        this.paragraphs![elementIndex].text = res.text;
-        for (let i = elementIndex + 1; i < this.paragraphs!.length; i++) {
-          this.paragraphs![i].globalPos += res.diff;
-        }
-        resolve();
-      });
-    });
+      true
+    )
+    .then(res => {
+      this.paragraphs![elementIndex].text = res.text;
+      for (let i = elementIndex + 1; i < this.paragraphs!.length; i++) {
+        this.paragraphs![i].globalPos += res.diff;
+      }
+    })
+    .catch(err => console.log(err));
   }
 
   configuration(): WordProcessorConfiguration {
@@ -188,7 +184,7 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
     }];
   }
 
-  updateParagraphs() {
+  updateText(): Promise<void> {
     console.log("UpdateParagraphs called.");
     return this.mutexDocument.runExclusive(() => this._updateParagraphs());
   }
@@ -197,11 +193,9 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
     console.log("_updateParagraphs called");
     this.paragraphs = null;
 
-    return new Promise<void>(resolve => {
-      this.Asc.plugin.callCommand(() => {
+    return this.callCommand(
+      () => {
         const oDocument = Api.GetDocument();
-        const oDocumentInfo = oDocument.GetDocumentInfo();
-        const title = oDocumentInfo.Title;
 
         let paragraphs: Paragraph[] = [], globalPos = 0;
         for (let i = 0; i < oDocument.GetElementsCount(); i++) {
@@ -215,19 +209,17 @@ export class WordProcessorAgentOnlyOfficeDocument extends WordProcessorAgent {
           }
         }
 
-        return { title, paragraphs };
+        return paragraphs;
       },
-        false,
-        false,
-        (res: { title: string, paragraphs: Paragraph[] }) => {
-          for (let i = 1; i < res.paragraphs.length; i++) {
-            res.paragraphs[i].globalPos += 4 * i;
-          }
-          this.title = res.title;
-          this.paragraphs = res.paragraphs;
-
-          resolve();
-        });
-    });
+      false,
+      false
+    )
+    .then(paragraphs => {
+      for (let i = 1; i < paragraphs.length; i++) {
+        paragraphs[i].globalPos += 4 * i;
+      }
+      this.paragraphs = paragraphs;
+    })
+    .catch(err => console.log(err));
   }
 }

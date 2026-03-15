@@ -1,22 +1,23 @@
 import { applyTranslation } from "./utils";
 
-let inputEl: HTMLInputElement | null;
+((window, undefined) => {
+  let inputEl: HTMLInputElement | null;
 
-window.Asc.plugin.init = function () {
+  window.Asc.plugin.init = function () {
     console.log("Init Settings");
     inputEl = document.getElementById("antidotePort") as HTMLInputElement;
 
     if (inputEl) {
-        const antidotePort = localStorage.getItem("ANTIDOTE_PORT");
-        if (antidotePort)
-            inputEl.value = antidotePort;
-        inputEl.focus();
+      const antidotePort = localStorage.getItem("ANTIDOTE_PORT");
+      if (antidotePort)
+        inputEl.value = antidotePort;
+      inputEl.focus();
     }
-};
+  };
 
-window.Asc.plugin.button = (id: string, windowId: string) => {
+  window.Asc.plugin.button = (id: string, windowId: string) => {
     if (!inputEl) {
-        inputEl = document.getElementById("antidotePort") as HTMLInputElement;
+      inputEl = document.getElementById("antidotePort") as HTMLInputElement;
     }
     console.log("Value of input El: ", inputEl)
     const value = inputEl ? Number(inputEl.value) : 0;
@@ -31,8 +32,9 @@ window.Asc.plugin.button = (id: string, windowId: string) => {
     console.log("windowId: ", windowId);
     window.Asc.plugin.executeCommand("close", "");
     // }
-};
+  };
 
-window.Asc.plugin.onTranslate = () => {
-  applyTranslation(window.Asc, "lable_antidote_port", "Websocket Port:");
-}
+  window.Asc.plugin.onTranslate = () => {
+    applyTranslation(window.Asc, "lable_antidote_port", "Websocket Port:");
+  }
+})(window, undefined);
