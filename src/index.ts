@@ -96,9 +96,9 @@ import { Range, WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/
     });
 
     window.Asc.plugin.attachEditorEvent("onParagraphText", (data: any) => {
-      console.log("The not firstLoad: ", !firstLoad);
-      console.log("The expression: ", !firstLoad && wordProcessorAgent
-        && !wordProcessorAgent.updatingByAntidote);
+      // console.log("The not firstLoad: ", !firstLoad);
+      // console.log("The expression: ", !firstLoad && wordProcessorAgent
+      //   && !wordProcessorAgent.updatingByAntidote);
       if (!firstLoad && wordProcessorAgent
         && !wordProcessorAgent.updatingByAntidote) {
 
@@ -108,7 +108,7 @@ import { Range, WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/
         setTimeout(() => {
           if (!firstLoad && wordProcessorAgent
             && !wordProcessorAgent.updatingByAntidote) {
-            console.log("From onParagraphText", data)
+            // console.log("From onParagraphText", data)
             wordProcessorAgent!.updateText();
           }
         }, 100);
