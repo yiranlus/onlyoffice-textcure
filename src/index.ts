@@ -73,21 +73,26 @@ import { Range, WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/
         const title = oDocumentInfo.Title;
 
         const oRange = oDocument.GetRangeBySelect();
-        const range = oRange ? {
-          start: oRange.GetStartPos(),
-          end: oRange.GetEndPos()
-        } as Range : null;
+        const start = oRange ? oRange.GetStartPos() : null;
+        const end = oRange ? oRange.GetEndPos() : null;
+
+        const range = (start === end) ? null : { start, end };
+
+        if (oRange) {
+          console.log(`oRange Text: "${JSON.stringify(oRange.GetText())}"`);
+          console.log(range);
+        }
 
         return { title, range };
       }
     )
     .then(async res => {
       const { title, range } = res;
-      // if (range) {
-        // wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(window.Asc, title, range);
-      // } else {
+      if (range) {
+        wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(window.Asc, title, range);
+      } else {
         wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc, title);
-      // }
+      }
       await wordProcessorAgent.updateText();
     })
     .then(() => {

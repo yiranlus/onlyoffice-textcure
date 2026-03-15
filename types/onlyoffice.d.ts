@@ -7,7 +7,12 @@ declare global {
       paramsReplace: {
         elementIndex: number,
         text: string
-      }
+      },
+      selectedRange: {
+        start: number,
+        end: number
+        text?: string
+      },
     }
   }
 
