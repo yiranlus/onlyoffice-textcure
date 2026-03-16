@@ -14,7 +14,7 @@ export type Range = {
   end: number
 }
 
-export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnlyOffice {
+export class WordProcessorAgentOnlyOfficeDocumentSelection extends WordProcessorAgentOnlyOffice {
   range: Range | null;
   text: string | null;
 
@@ -38,7 +38,7 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
       this.text!.substring(0, params.positionStartReplace) +
       params.newString +
       this.text!.substring(params.positionReplaceEnd)
-    )
+    );
     this.Asc.scope.selectedRange = { ...this.range!, text: this.text };
 
     return this.callCommand(
@@ -47,7 +47,7 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
         const oDocument = Api.GetDocument();
         const oRange = oDocument.GetRange(start, end);
 
-        const textArr = text!.replace(/(?:\r\n)+$/, "").split(/(?:\r\n)+|\t/g);
+        const textArr = text!.replace(/(?:\r\n)+$/, "").split(/(?:\r\n){2}|\t/g);
 
         // console.log(`Text to Replace: ${JSON.stringify(text)}`);
         // console.log(`Text Array to Replace: ${JSON.stringify(textArr)}`);
@@ -126,7 +126,7 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
     .then(({range, text}) => {
       this.range = range as (Range | null);
       this.text = text;
-      // console.log(`Stored text: ${JSON.stringify(this.text)}`);
+      console.log(`Stored text: ${JSON.stringify(this.text)}`);
     });
   }
 }

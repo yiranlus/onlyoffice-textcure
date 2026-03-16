@@ -13,6 +13,7 @@ declare global {
         end: number
         text?: string
       },
+      selectedText: string
     }
   }
 

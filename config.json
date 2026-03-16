@@ -14,9 +14,7 @@
       ],
       "initOnSelectionChanged": true,
       "isViewer": false,
-      "EditorsSupport": [
-        "word"
-      ],
+      "EditorsSupport": [ "word", "slide", "cell" ],
       "isVisual": false,
       "initDataType": "none",
       "initData": "",
@@ -39,9 +37,7 @@
         "resources/images/icon@2x.png"
       ],
       "isViewer": false,
-      "EditorsSupport": [
-        "word"
-      ],
+      "EditorsSupport": [ "word", "slide", "cell" ],
       "isVisual": true,
       "isModal": true,
       "isInsideMode": false,
