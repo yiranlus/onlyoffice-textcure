@@ -1,15 +1,14 @@
 {
   "name": "onlyoffice-textcure",
   "version": "0.4.3",
-  "description": "",
-  "main": "index.js",
+  "description": "Unofficial Druide Antidote plugin for OnlyOffice",
   "scripts": {
     "build": "rimraf build && vite build && cp -r CHANGELOG.md LICENSE NOTICE translations resources build/",
     "build:plugin": "npm run build && npm run create-plugin",
     "create-plugin": "node scripts/create-plugin.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["antidote", "onlyoffice", "plugins", "text corrector"],
+  "author": "Yiran LU",
   "license": "MIT",
   "packageManager": "pnpm@10.32.1",
   "devDependencies": {
