@@ -16,7 +16,7 @@
       "isViewer": false,
       "EditorsSupport": [ "word", "slide", "cell" ],
       "isVisual": false,
-      "initDataType": "none",
+      "initDataType": "text",
       "initData": "",
       "buttons": [],
       "store": {

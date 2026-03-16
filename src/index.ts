@@ -64,17 +64,28 @@ import { WordProcessorAgentOnlyOfficeUniversalSelection } from "./processor-agen
       })
   }
 
-  window.Asc.plugin.init = () => {
+  window.Asc.plugin.init = (text: string) => {
+    const alternativeText = (text.length === 0) ? null : text;
+    console.log(`Top-level selected text: ${JSON.stringify(alternativeText)}`);
+
     if (wordProcessorAgent && wordProcessorAgent.isAvailable) {
       // On every selection change
-      if ((wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeDocumentSelection
-        || wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeUniversalSelection)
-        && !wordProcessorAgent.updatingByAntidote) {
-        setTimeout(() => {
-          if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
-            wordProcessorAgent.updateText();
-          }
-        }, 200);
+
+      if (!wordProcessorAgent.updatingByAntidote) {
+        if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeDocumentSelection) {
+          setTimeout(() => {
+            if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
+              wordProcessorAgent.updateText();
+            }
+          }, 200);
+        } else if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeUniversalSelection) {
+          setTimeout(() => {
+            (wordProcessorAgent as WordProcessorAgentOnlyOfficeUniversalSelection).setAlternativeText(alternativeText);
+            if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
+              wordProcessorAgent.updateText();
+            }
+          }, 200);
+        }
       }
     } else {
       // Otherwise, create an WordProcessorAgent instance
@@ -128,6 +139,8 @@ import { WordProcessorAgentOnlyOfficeUniversalSelection } from "./processor-agen
           )
             .then(title => {
               wordProcessorAgent = new WordProcessorAgentOnlyOfficeUniversalSelection(window.Asc, title);
+              (wordProcessorAgent as WordProcessorAgentOnlyOfficeUniversalSelection)
+                .setAlternativeText(alternativeText);
             });
           break;
         case "cell":
@@ -144,6 +157,8 @@ import { WordProcessorAgentOnlyOfficeUniversalSelection } from "./processor-agen
           )
             .then(title => {
               wordProcessorAgent = new WordProcessorAgentOnlyOfficeUniversalSelection(window.Asc, title);
+              (wordProcessorAgent as WordProcessorAgentOnlyOfficeUniversalSelection)
+                .setAlternativeText(alternativeText);
             });
           break;
       }

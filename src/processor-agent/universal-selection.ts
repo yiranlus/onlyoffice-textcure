@@ -10,11 +10,13 @@ import { WordProcessorAgentOnlyOffice } from "./base";
 
 export class WordProcessorAgentOnlyOfficeUniversalSelection extends WordProcessorAgentOnlyOffice {
   text: string | null;
+  alternativeText: string | null;
 
   constructor(Asc: IAsc, title: string) {
     super(Asc, title);
 
     this.text = null;
+    this.alternativeText = null;
   }
 
   configuration(): WordProcessorConfiguration {
@@ -62,6 +64,10 @@ export class WordProcessorAgentOnlyOfficeUniversalSelection extends WordProcesso
     ]
   }
 
+  setAlternativeText(text: string | null) {
+    this.alternativeText = text ? text.replace("\r\n", "\r\n\r\n") : null;
+  }
+
   updateText(): Promise<void> {
     // console.log("updateText called");
     this.text = null;
@@ -73,9 +79,10 @@ export class WordProcessorAgentOnlyOfficeUniversalSelection extends WordProcesso
       TableRowSeparator: "\r\n\r\n",
       TabSymbol: String.fromCharCode(160)
     }])
-    .then((text?: string) => {
-      // console.log(`The Text: ${JSON.stringify(text)}`);
-      this.text = text ?? null;
+    .then((text: string) => {
+      console.log(`The Text: ${JSON.stringify(text)}`);
+      this.text = text === "" ? this.alternativeText: text;
+      console.log(`This Text: ${JSON.stringify(this.text)}`);
     })
   }
 }
