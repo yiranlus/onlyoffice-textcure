@@ -12,7 +12,7 @@ Please manually install this plugin to OnlyOffice.
 
 Clone the repository
 ```
-git clone https://github.com/onlyoffice/onlyoffice-antidote.git
+git clone https://github.com/onlyoffice/onlyoffice-textcure.git
 ```
   
 Install dependencies
