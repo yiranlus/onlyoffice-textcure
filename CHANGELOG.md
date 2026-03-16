@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0
+## 0.4.1
 
 * Support OnlyOffice Spreadsheet and Presentation. Now you can correct text in
   these two application by selecting the text element.
