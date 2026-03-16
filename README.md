@@ -4,7 +4,7 @@ Unofficial Antidote plugin for [ONLYOFFICE](https://www.onlyoffice.com/).
 
 ## Installation
 
-You can go to the [release page](https://github.com/yiranlus/onlyoffice-antidote/releases) to download the latest version of the plugin. The filename is ended with `.plugin`.
+You can go to the [release page](https://github.com/yiranlus/onlyoffice-textcure/releases) to download the latest version of the plugin. The filename is ended with `.plugin`.
 
 Please manually install this plugin to OnlyOffice.
 
