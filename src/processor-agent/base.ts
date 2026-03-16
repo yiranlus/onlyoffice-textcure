@@ -14,6 +14,8 @@ export abstract class WordProcessorAgentOnlyOffice extends WordProcessorAgent {
   mutexDocument: Mutex;
   mutexUpdateText: Mutex;
 
+  isAvailable: boolean;
+
   constructor(Asc: IAsc, title: string) {
     super();
     this.Asc = Asc;
@@ -25,6 +27,8 @@ export abstract class WordProcessorAgentOnlyOffice extends WordProcessorAgent {
     this.updatingByAntidote = false;
     this.mutexDocument = new Mutex();
     this.mutexUpdateText = new Mutex();
+
+    this.isAvailable = true;
   }
 
   sessionStarted(): void {
@@ -48,6 +52,8 @@ export abstract class WordProcessorAgentOnlyOffice extends WordProcessorAgent {
     super.sessionEnded();
     this.Asc.plugin.detachEditorEvent("onParagraphText");
     this.Asc.plugin.executeCommand("close", "");
+
+    this.isAvailable = false;
   }
 
   _internalUpdateText() {

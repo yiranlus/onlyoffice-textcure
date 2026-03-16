@@ -64,38 +64,51 @@ import { WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/selecti
   }
 
   window.Asc.plugin.init = () => {
-    utils.callCommand(
-      window.Asc,
-      () => {
-        const oDocument = Api.GetDocument();
-        const oDocumentInfo = oDocument.GetDocumentInfo();
-        const title = oDocumentInfo.Title;
-
-        const oRange = oDocument.GetRangeBySelect();
-        const start = oRange ? oRange.GetStartPos() : null;
-        const end = oRange ? oRange.GetEndPos() : null;
-
-        const hasSelection = (start !== end);
-
-        // if (oRange) {
-        //   console.log(`oRange Text: "${JSON.stringify(oRange.GetText())}"`);
-        //   console.log(range);
-        // }
-
-        return { title, hasSelection };
+    if (wordProcessorAgent && wordProcessorAgent.isAvailable) {
+      // On every selection change
+      if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeSelection
+        && !wordProcessorAgent.updatingByAntidote) {
+        setTimeout(() => {
+          if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
+            wordProcessorAgent.updateText();
+          }
+        }, 200);
       }
-    )
-    .then(async ({ title, hasSelection }) => {
-      if (hasSelection) {
-        wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(window.Asc, title);
-      } else {
-        wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc, title);
-      }
-      await wordProcessorAgent.updateText();
-    })
-    .then(() => {
-      launchCorrector();
-    });
+    } else {
+      // Otherwise, create an WordProcessorAgent instance
+      utils.callCommand(
+        window.Asc,
+        () => {
+          const oDocument = Api.GetDocument();
+          const oDocumentInfo = oDocument.GetDocumentInfo();
+          const title = oDocumentInfo.Title;
+
+          const oRange = oDocument.GetRangeBySelect();
+          const start = oRange ? oRange.GetStartPos() : null;
+          const end = oRange ? oRange.GetEndPos() : null;
+
+          const hasSelection = (start !== end);
+
+          // if (oRange) {
+          //   console.log(`oRange Text: "${JSON.stringify(oRange.GetText())}"`);
+          //   console.log(range);
+          // }
+
+          return { title, hasSelection };
+        }
+      )
+        .then(async ({ title, hasSelection }) => {
+          if (hasSelection) {
+            wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(window.Asc, title);
+          } else {
+            wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(window.Asc, title);
+          }
+          await wordProcessorAgent.updateText();
+        })
+        .then(() => {
+          launchCorrector();
+        });
+    }
   };
 
   window.Asc.plugin.button = (id: string, windowId: string) => {

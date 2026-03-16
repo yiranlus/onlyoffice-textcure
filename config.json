@@ -12,6 +12,7 @@
         "resources/images/icon.png",
         "resources/images/icon@2x.png"
       ],
+      "initOnSelectionChanged": true,
       "isViewer": false,
       "EditorsSupport": [
         "word"

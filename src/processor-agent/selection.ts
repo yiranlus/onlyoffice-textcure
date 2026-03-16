@@ -98,6 +98,8 @@ export class WordProcessorAgentOnlyOfficeSelection extends WordProcessorAgentOnl
 
   updateText(): Promise<void> {
     // console.log("updateText called");
+    this.text = null;
+
     return this.callCommand(
       () => {
         const oDocument = Api.GetDocument();
