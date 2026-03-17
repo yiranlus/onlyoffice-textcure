@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0
+
+* Change to the icon, logos
+* Add light and dark theme support
+
 ## 0.4.1
 
 * Support OnlyOffice Spreadsheet and Presentation. Now you can correct text in
