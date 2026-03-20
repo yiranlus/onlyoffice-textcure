@@ -40,7 +40,7 @@ import { WordProcessorAgentOnlyOfficeUniversalSelection } from "./processor-agen
   let connectionErrorModalId: string | null;
 
   function getAntidotePort() {
-    const antidotePort = localStorage.getItem("ANTIDOTE_PORT");
+    const antidotePort = window.localStorage.getItem("ANTIDOTE_PORT");
     if (antidotePort) {
       return Number(antidotePort);
     }
@@ -48,8 +48,16 @@ import { WordProcessorAgentOnlyOfficeUniversalSelection } from "./processor-agen
     throw new Error("Antidote port is not set.")
   }
 
+  function getUpdateDelayMS() {
+    const updateDelayMS = window.localStorage.getItem("UPDATE_DELAY_MS");
+    if (updateDelayMS) {
+      return Number(updateDelayMS);
+    }
+    return 200;
+  }
+
   function getForceSetPort() {
-    const forceSetPort = localStorage.getItem("FORCE_SET_PORT");
+    const forceSetPort = window.localStorage.getItem("FORCE_SET_PORT");
     if (forceSetPort === "true")
       return true;
     return false;
@@ -92,14 +100,14 @@ import { WordProcessorAgentOnlyOfficeUniversalSelection } from "./processor-agen
             if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
               wordProcessorAgent.updateText();
             }
-          }, 200);
+          }, getUpdateDelayMS());
         } else if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeUniversalSelection) {
           setTimeout(() => {
             (wordProcessorAgent as WordProcessorAgentOnlyOfficeUniversalSelection).setAlternativeText(alternativeText);
             if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
               wordProcessorAgent.updateText();
             }
-          }, 200);
+          }, getUpdateDelayMS());
         }
       }
     } else {

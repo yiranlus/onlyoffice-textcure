@@ -3,6 +3,14 @@ import { ParamsReplace, WordProcessorAgent } from "@druide-informatique/antidote
 import * as utils from "../utils";
 import { E_CANCELED, Mutex } from "async-mutex";
 
+function getUpdateDelayMS() {
+  const updateDelayMS = window.localStorage.getItem("UPDATE_DELAY_MS");
+  if (updateDelayMS) {
+    return Number(updateDelayMS);
+  }
+  return 200;
+}
+
 export abstract class WordProcessorAgentOnlyOffice extends WordProcessorAgent {
   Asc: IAsc;
   title: string;
@@ -43,7 +51,7 @@ export abstract class WordProcessorAgentOnlyOffice extends WordProcessorAgent {
             // console.log("From onParagraphText", data)
             this!._internalUpdateText();
           }
-        }, 200);
+        }, getUpdateDelayMS());
       }
     });
   }
