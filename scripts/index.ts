@@ -7,8 +7,7 @@ import * as utils from "./utils";
 import Settings from "./settings";
 import { WordProcessorAgentOnlyOffice } from "./processor-agent/base";
 import { WordProcessorAgentOnlyOfficeDocument } from "./processor-agent/document";
-import { WordProcessorAgentOnlyOfficeDocumentSelection } from "./processor-agent/document-selection";
-import { WordProcessorAgentOnlyOfficeUniversalSelection } from "./processor-agent/universal-selection";
+import { WordProcessorAgentOnlyOfficeUniversalSelection as WordProcessorAgentOnlyOfficeSelection } from "./processor-agent/selection";
 
 export function setupPlugin() {
   let isInitialized = false;
@@ -65,15 +64,9 @@ export function setupPlugin() {
       // On every selection change
 
       if (!wordProcessorAgent.updatingByAntidote) {
-        if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeDocumentSelection) {
+        if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeSelection) {
           setTimeout(() => {
-            if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
-              wordProcessorAgent.updateText();
-            }
-          }, Settings.getUpdateDelayMS());
-        } else if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeUniversalSelection) {
-          setTimeout(() => {
-            (wordProcessorAgent as WordProcessorAgentOnlyOfficeUniversalSelection).setAlternativeText(alternativeText);
+            (wordProcessorAgent as WordProcessorAgentOnlyOfficeSelection).setAlternativeText(alternativeText);
             if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
               wordProcessorAgent.updateText();
             }
@@ -82,74 +75,24 @@ export function setupPlugin() {
       }
     } else {
       // Otherwise, create an WordProcessorAgent instance
-      let promise: Promise<void> | null = null;
-      switch (window.Asc.plugin.info.editorType) {
-        case "word":
-          promise = utils.callCommand(
-            () => {
-              const oDocument = Api.GetDocument();
-              const oDocumentInfo = oDocument.GetDocumentInfo();
-              const title = oDocumentInfo.Title;
-
-              const oRange = oDocument.GetRangeBySelect();
-              const start = oRange ? oRange.GetStartPos() : null;
-              const end = oRange ? oRange.GetEndPos() : null;
-
-              const hasSelection = (start !== end);
-
-              return { title, hasSelection };
-            },
-            false,
-            false,
-          )
-            .then(async ({ title, hasSelection }) => {
-              if (hasSelection) {
-                wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocumentSelection(title);
-              } else {
+      utils.getDocumentTitle()
+        .then(title => {
+          switch (window.Asc.plugin.info.editorType) {
+            case "word":
+              if (!alternativeText) {
                 wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(title);
+                break;
               }
-            });
-          break;
-        case "slide":
-          promise = utils.callCommand(
-            () => {
-              const oPresentation = Api.GetPresentation();
-              const oDocumentInfo = oPresentation.GetDocumentInfo();
-              const title = oDocumentInfo.Title;
-
-              return title;
-            },
-            false,
-            false
-          )
-            .then(title => {
-              wordProcessorAgent = new WordProcessorAgentOnlyOfficeUniversalSelection(title);
-              (wordProcessorAgent as WordProcessorAgentOnlyOfficeUniversalSelection)
+            case "slide":
+            case "cell":
+              wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(title);
+              (wordProcessorAgent as WordProcessorAgentOnlyOfficeSelection)
                 .setAlternativeText(alternativeText);
-            });
-          break;
-        case "cell":
-          promise = utils.callCommand(
-            () => {
-              const oDocumentInfo = Api.GetDocumentInfo();
-              const title = oDocumentInfo.Title;
-
-              return title;
-            },
-            false,
-            false
-          )
-            .then(title => {
-              wordProcessorAgent = new WordProcessorAgentOnlyOfficeUniversalSelection(title);
-              (wordProcessorAgent as WordProcessorAgentOnlyOfficeUniversalSelection)
-                .setAlternativeText(alternativeText);
-            });
-          break;
-      }
-
-      if (promise) {
-        promise.then(() => wordProcessorAgent!.updateText()).then(launchCorrector);
-      }
+              break;
+          }
+        })
+        .then(() => wordProcessorAgent!.updateText())
+        .then(launchCorrector);
     }
 
     isInitialized = true;

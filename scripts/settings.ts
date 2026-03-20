@@ -72,10 +72,10 @@ export function setupPlugin() {
     inputForceSetPort = document.getElementById("forceSetPort") as HTMLInputElement;
 
     if (inputAntidotePort) {
-      inputAntidotePort.value = Settings.getAntidotePort.toString();
+      inputAntidotePort.value = Settings.getAntidotePort().toString();
     }
     if (inputUpdateDelayMS) {
-      inputUpdateDelayMS.value = Settings.getUpdateDelayMS.toString();
+      inputUpdateDelayMS.value = Settings.getUpdateDelayMS().toString();
     }
     if (inputForceSetPort) {
       inputForceSetPort.checked = Settings.getForceSetPort();

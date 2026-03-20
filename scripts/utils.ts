@@ -12,7 +12,6 @@ export function getFullUrl(name: string): string {
   return location.href.replace(file, name);
 }
 
-
 export function callCommand<T>(
   func: () => T,
   isClose: boolean = false,
@@ -34,4 +33,31 @@ export function executeMethod(
       resolve(res);
     })
   })
+}
+
+export async function getDocumentTitle(): Promise<string> {
+  switch (window.Asc.plugin.info.editorType) {
+    case "word":
+      return callCommand(() => {
+        const oDocument = Api.GetDocument();
+        const oDocumentInfo = oDocument.GetDocumentInfo();
+        return oDocumentInfo.Title;
+      }, false, false);
+    case "slide":
+      return callCommand(() => {
+        const oPresentation = Api.GetPresentation();
+        const oDocumentInfo = oPresentation.GetDocumentInfo();
+        const title = oDocumentInfo.Title;
+
+        return title;
+      }, false, false);
+    case "cell":
+      return callCommand(() => {
+        const oDocumentInfo = Api.GetDocumentInfo();
+        const title = oDocumentInfo.Title;
+
+        return title;
+      }, false, false);
+  }
+  throw new Error("Unsupported editor type");
 }
