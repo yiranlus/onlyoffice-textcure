@@ -14,21 +14,21 @@ export function setupPlugin() {
   let wordProcessorAgent: WordProcessorAgentOnlyOffice | null;
 
   const connectionErrorModal = {
-    url: utils.getFullUrl("connection-error.html"),  // Same HTML as config variationnt
+    url: utils.getFullUrl("connection-error.html"), // Same HTML as config variationnt
     description: window.Asc.plugin.tr("Error"),
     isVisual: true,
     EditorsSupport: ["word"],
-    isModal : true,
-    isInsideMode : false,
-    initDataType : "none",
-    initData : "",
+    isModal: true,
+    isInsideMode: false,
+    initDataType: "none",
+    initData: "",
     size: [350, 150],
     buttons: [
       {
         text: window.Asc.plugin.tr("Close"),
-        primary: true
-      }
-    ]
+        primary: true,
+      },
+    ],
   };
   let connectionErrorModalId: string | null;
 
@@ -36,37 +36,44 @@ export function setupPlugin() {
     AntidoteConnector.announcePresence();
 
     if (AntidoteConnector.isDetected()) {
-      console.log("Antidote Connector is detected")
+      console.log("Antidote Connector is detected");
     }
 
     const agent = new ConnectixAgent(
       wordProcessorAgent!,
-      (AntidoteConnector.isDetected() && !Settings.getForceSetPort())?
-      AntidoteConnector.getWebSocketPort :
-      async () => Settings.getAntidotePort()
+      Settings.getForceSetPort()
+        ? async () => Settings.getAntidotePort()
+        : AntidoteConnector.isDetected()
+          ? AntidoteConnector.getWebSocketPort
+          : utils.getWebSocketPort,
     );
 
-    agent.connectWithAntidote()
+    agent
+      .connectWithAntidote()
       .then(() => agent.launchCorrector())
-      .catch(error => {
+      .catch((error) => {
         const errorDialog = new window.Asc.PluginWindow();
         errorDialog.show(connectionErrorModal);
         connectionErrorModalId = errorDialog.id;
 
         console.log(error);
-      })
-  }
+      });
+  };
 
   window.Asc.plugin.init = (text: string) => {
-    const alternativeText = (text.length === 0) ? null : text;
+    const alternativeText = text.length === 0 ? null : text;
 
     if (wordProcessorAgent && wordProcessorAgent.isAvailable) {
       // On every selection change
 
       if (!wordProcessorAgent.updatingByAntidote) {
-        if (wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeSelection) {
+        if (
+          wordProcessorAgent instanceof WordProcessorAgentOnlyOfficeSelection
+        ) {
           setTimeout(() => {
-            (wordProcessorAgent as WordProcessorAgentOnlyOfficeSelection).setAlternativeText(alternativeText);
+            (
+              wordProcessorAgent as WordProcessorAgentOnlyOfficeSelection
+            ).setAlternativeText(alternativeText);
             if (wordProcessorAgent && !wordProcessorAgent.updatingByAntidote) {
               wordProcessorAgent.updateText();
             }
@@ -75,19 +82,25 @@ export function setupPlugin() {
       }
     } else {
       // Otherwise, create an WordProcessorAgent instance
-      utils.getDocumentTitle()
-        .then(title => {
+      utils
+        .getDocumentTitle()
+        .then((title) => {
           switch (window.Asc.plugin.info.editorType) {
             case "word":
               if (!alternativeText) {
-                wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(title);
+                wordProcessorAgent = new WordProcessorAgentOnlyOfficeDocument(
+                  title,
+                );
                 break;
               }
             case "slide":
             case "cell":
-              wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(title);
-              (wordProcessorAgent as WordProcessorAgentOnlyOfficeSelection)
-                .setAlternativeText(alternativeText);
+              wordProcessorAgent = new WordProcessorAgentOnlyOfficeSelection(
+                title,
+              );
+              (
+                wordProcessorAgent as WordProcessorAgentOnlyOfficeSelection
+              ).setAlternativeText(alternativeText);
               break;
           }
         })

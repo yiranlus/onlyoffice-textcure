@@ -7,10 +7,15 @@
     "build:plugin": "npm run build && npm run create-plugin",
     "create-plugin": "node node_scripts/create-plugin.js"
   },
-  "keywords": ["antidote", "onlyoffice", "plugins", "text corrector"],
+  "keywords": [
+    "antidote",
+    "onlyoffice",
+    "plugins",
+    "text corrector"
+  ],
   "author": "Yiran LU",
   "license": "MIT",
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@10.33.0",
   "devDependencies": {
     "@types/node": "^25.4.0",
     "archiver": "^7.0.1",

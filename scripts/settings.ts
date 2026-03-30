@@ -23,7 +23,7 @@ function getAntidotePort(): number {
 }
 
 function setAntidotePort(port: number) {
-  antidotePort = port
+  antidotePort = port;
   window.localStorage.setItem("ANTIDOTE_PORT", port.toString());
 }
 
@@ -57,8 +57,8 @@ const Settings = {
   getUpdateDelayMS,
   setUpdateDelayMS,
   getForceSetPort,
-  setForceSetPort
-}
+  setForceSetPort,
+};
 export default Settings;
 
 export function setupPlugin() {
@@ -67,9 +67,15 @@ export function setupPlugin() {
   let inputUpdateDelayMS: HTMLInputElement | null;
 
   window.Asc.plugin.init = function () {
-    inputAntidotePort = document.getElementById("antidotePort") as HTMLInputElement;
-    inputUpdateDelayMS = document.getElementById("updateDelayMS") as HTMLInputElement;
-    inputForceSetPort = document.getElementById("forceSetPort") as HTMLInputElement;
+    inputAntidotePort = document.getElementById(
+      "antidotePort",
+    ) as HTMLInputElement;
+    inputUpdateDelayMS = document.getElementById(
+      "updateDelayMS",
+    ) as HTMLInputElement;
+    inputForceSetPort = document.getElementById(
+      "forceSetPort",
+    ) as HTMLInputElement;
 
     if (inputAntidotePort) {
       inputAntidotePort.value = Settings.getAntidotePort().toString();
@@ -82,7 +88,7 @@ export function setupPlugin() {
     }
   };
 
-  window.Asc.plugin.button = (id: string, windowId: string) => {
+  window.Asc.plugin.button = (_id: string, _windowId: string) => {
     const _antidotePort = Number(inputAntidotePort!.value);
     const _updateDelayMS = Number(inputUpdateDelayMS!.value);
     const _forceSetPort = inputForceSetPort!.checked;
@@ -98,6 +104,6 @@ export function setupPlugin() {
   window.Asc.plugin.onTranslate = () => {
     applyTranslation("lblAntidotePort", "Websocket Port:");
     applyTranslation("lblUpdateDelayMS", "Update Delay (ms):");
-    applyTranslation("lblForceSetPort", "Ignore Antidote Connector");
-  }
+    applyTranslation("lblForceSetPort", "Disable Automatic Port Detection");
+  };
 }

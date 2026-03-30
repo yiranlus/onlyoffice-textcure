@@ -1,6 +1,9 @@
 # TextCure
 
 Unofficial Antidote plugin for [ONLYOFFICE](https://www.onlyoffice.com/). Powered by [@druide-informatique/antidote-api-js](https://www.jsdelivr.com/package/npm/@druide-informatique/antidote-api-js).
+## Requirement
+
+This plugin is developped with OnlyOffice 9.3.1.8 and Antidote 12. Since the WebSocket API was introduced only from Antidote 12, so prior versions of Antidote are not expected to work with this plugin.
 
 ## Installation
 
