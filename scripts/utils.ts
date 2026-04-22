@@ -6,23 +6,31 @@ export async function getWebSocketPort(): Promise<number> {
 
   let portWebSocket: number | null = null;
 
-  const testWebSocketPort = (port: number): Promise<boolean> => {
+  const testWebSocketPort = (
+    port: number,
+    initPort?: number,
+  ): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
-      let ws = new WebSocket(`ws://localhost:${port}`);
+      const currentPort = initPort ?? port;
+      let ws = new WebSocket(`ws://localhost:${currentPort}`);
+
       ws.addEventListener("open", (_event) => {
-        portWebSocket = port;
+        portWebSocket = currentPort;
         resolve(true);
       });
       ws.addEventListener("error", (_event) => {
         if (port <= portMiminum + numberOfValidPorts) {
-          testWebSocketPort(port + 1).then(resolve);
+          testWebSocketPort(initPort ? port : port + 1).then(resolve);
         } else {
           resolve(false);
         }
       });
     });
   };
-  const hasWebSocketPort = await testWebSocketPort(portMiminum);
+  const hasWebSocketPort = await testWebSocketPort(
+    portMiminum,
+    Settings.getAntidotePort(),
+  );
 
   if (!hasWebSocketPort || portWebSocket === null)
     throw new Error("No WebSocket port found");
